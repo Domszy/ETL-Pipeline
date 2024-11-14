@@ -4,6 +4,7 @@ from airflow.operators.python import PythonOperator
 import json 
 import requests 
 import uuid
+from kafka import KafkaProducer
 
 default_args = {
     'owener': 'Dominic Siew', 
@@ -39,6 +40,9 @@ def stream_data():
     response_from_api = get_data() 
     formatted_info = format_data(response_from_api)
 
-    print(json.dumps(formatted_info, indent=3))
+    # print(json.dumps(formatted_info, indent=3))
+
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+    producer.send('user_created', json.dumps(formatted_info).encode('utf-8'))
 
 stream_data()
