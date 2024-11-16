@@ -9,7 +9,7 @@ import time
 import logging
 
 default_args = {
-    'owener': 'Dominic Siew', 
+    'owner': 'Dominic Siew', 
     'start_date': datetime(2024, 8, 3, 10, 00) 
 }
 
