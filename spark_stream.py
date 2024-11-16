@@ -113,6 +113,26 @@ def insert_data(session, **kwargs):
     except Exception as e:
         logging.error(f'could not insert data due to {e}')
 
+def create_selection_df_from_kafka(spark_df):
+    schema = StructType([
+        StructField("id", StringType(), False),
+        StructField("first_name", StringType(), False),
+        StructField("last_name", StringType(), False),
+        StructField("gender", StringType(), False),
+        StructField("address", StringType(), False),
+        StructField("post_code", StringType(), False),
+        StructField("email", StringType(), False),
+        StructField("username", StringType(), False),
+        StructField("registered_date", StringType(), False),
+        StructField("phone", StringType(), False),
+        StructField("picture", StringType(), False)
+    ])
+
+    sel = spark_df.selectExpr("CAST(value AS STRING)") \
+        .select(from_json(col('value'), schema).alias('data')).select("data.*")
+    print(sel)
+
+    return sel
 
 if __name__ == "__main__": 
     # create spark connection
@@ -120,12 +140,21 @@ if __name__ == "__main__":
 
     if spark_conn:
         # connect to kafka with spark connection 
-        df = connect_to_kafka(spark_conn)
+        spark_df = connect_to_kafka(spark_conn)
+        selection_df = create_selection_df_from_kafka(spark_df)
         session = create_cassandra_connection()
 
         if session: 
             create_keyspace(session)
             create_table(session)
-            insert_data(session)
+            # insert_data(session)
+
+            streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")
+                               .option('checkpointLocation', '/tmp/checkpoint')
+                               .option('keyspace', 'spark_streams')
+                               .option('table', 'created_users')
+                               .start())
+            
+            streaming_query.awaitTermination()
 
 
