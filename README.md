@@ -5,7 +5,7 @@ This guide provides a step-by-step approach to building a full-scale data engine
 ## Key Learning Points 
 As we systematically review the key concepts from this project, we will walk through the sequence in which data is processed within the system. Below is a rough diagram of the flow in which data is being processed: 
 
-![system architrecture diagram](./system_architecture_diagram.png)
+![system architrecture diagram](./images/system_architecture_diagram.png)
 
 ### Confluence
 
@@ -39,7 +39,7 @@ we can also access its own web-based UI via `localhost:8080` which allows users 
 
 Below is an outline of the architecture used in this project. More about Airflow's architecture can be found [here](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html). 
 
-![airflow architectural diagram](./architecture_diagram_airflow.png)
+![airflow architectural diagram](./images/architecture_diagram_airflow.png)
 
 In a large distributed system, there can be other roles that can be played, such as `Deployment Manager`, `DAG Author`, and `Operations User`, which plays a part in managing a larger system of machines. 
 
@@ -49,7 +49,7 @@ In the case of a distributed deployment, it is important to consider the securit
 * DAG Author: Develops and writes DAGs to define workflows, ensuring they are correctly structured and meet the requirements for execution within the Airflow system.
 * Operations User: Manages the execution of DAGs, monitors task status, triggers runs, and resolves issues, but does not have permissions to modify or create DAGs.
 
-![advanced airflow architectural diagram](./advanced_architecture_diagram_airflow.png)
+![advanced airflow architectural diagram](./images/advanced_architecture_diagram_airflow.png)
 
 ### Kafka
 
