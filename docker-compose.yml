@@ -175,6 +175,7 @@ services:
       - "7077:7077"
     networks:
       - confluent
+
   spark-worker:
     image: bitnami/spark:latest
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
