@@ -20,14 +20,14 @@ def create_spark_connection():
         # s_conn represents the driver node
         s_conn = SparkSession.builder \
             .appName('SparkDataStreaming') \
-            .config('spark.jars.packages', "com.datastax.spark:spark-cassandra-connector_2.13:3.4.1," # downloads the corresponding packages needed in java
-                                           "org.apache.spark:spark-sql-kafka-0-10_2.13:3.4.1") \
+            .config('spark.jars.packages', "com.datastax.spark:spark-cassandra-connector_2.12:3.5.1," \
+                                           "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,") \
             .config('spark.cassandra.connection.host', 'localhost') \
             .getOrCreate()
         
         # sparkContext is used to configure and interact with the Spark application
         # "ERROR" only shows errors, suppressing info and warnings.
-        s_conn.sparkContext.setLogLevel("ERROR")
+        s_conn.sparkContext.setLogLevel("DEBUG")
 
         # logs that spark connection with cassandra and kafka is done 
         logging.info("Spark connection created successfully!")
@@ -134,27 +134,26 @@ def create_selection_df_from_kafka(spark_df):
 
     return sel
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     # create spark connection
     spark_conn = create_spark_connection()
 
-    if spark_conn:
-        # connect to kafka with spark connection 
+    if spark_conn is not None:
+        # connect to kafka with spark connection
         spark_df = connect_to_kafka(spark_conn)
         selection_df = create_selection_df_from_kafka(spark_df)
         session = create_cassandra_connection()
 
-        if session: 
+        if session is not None:
             create_keyspace(session)
             create_table(session)
-            # insert_data(session)
+
+            logging.info("Streaming is being started...")
 
             streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")
                                .option('checkpointLocation', '/tmp/checkpoint')
                                .option('keyspace', 'spark_streams')
                                .option('table', 'created_users')
                                .start())
-            
+
             streaming_query.awaitTermination()
-
-
