@@ -72,7 +72,7 @@ You can interact with Kafka through its command-line interface (CLI) or through 
 * Leader and Follower: Every partition in Kafka will have one server that plays the role of a leader for that particular partition. The leader is responsible for performing all the read and write tasks for the partition. Each partition can have zero or more followers. The duty of the follower is to replicate the data of the leader. In the event of a failure in the leader for a particular partition, one of the follower nodes can take on the role of the leader.
 * Zookeeper (older versions of kafka only): detects broker failures and coordinates leader elections in that instance. In more recent releases, Kafka has been transitioning to a KRaft mode (Kafka Raft), removing the need for Zookeeper for cluster metadata management and leader election.
 
-![kafka architectural diagram](architecture_diagram_kafka.png)
+![kafka architectural diagram](./images/architecture_diagram_kafka.png)
 
 #### Spark 
 **What is Spark**: Apache Spark is an open-source, distributed computing system designed for fast, large-scale data processing. It provides a unified platform for batch and stream processing, offering high performance for both big data analytics and machine learning workloads.
