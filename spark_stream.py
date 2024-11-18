@@ -9,7 +9,7 @@ def create_keyspace(session):
     session.execute("""
         CREATE KEYSPACE IF NOT EXISTS spark_streams
         WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
-    """)
+        """)
 
     print("Keyspace created successfully!")
 
@@ -27,7 +27,7 @@ def create_spark_connection():
         
         # sparkContext is used to configure and interact with the Spark application
         # "ERROR" only shows errors, suppressing info and warnings.
-        s_conn.sparkContext.setLogLevel("DEBUG")
+        s_conn.sparkContext.setLogLevel("ERROR")
 
         # logs that spark connection with cassandra and kafka is done 
         logging.info("Spark connection created successfully!")
@@ -39,7 +39,7 @@ def create_spark_connection():
 
 def create_cassandra_connection():
     try:
-        # Cassandra typically listens on port 9042 for client connections (including CQL clients like your cas_session object). 
+        # Cassandra typically listens on port 9042 for client connections (including CQL clients like cas_session object). 
         # If the port is not explicitly specified in the connection settings, Cassandra defaults to this port.
         cluster = Cluster(['localhost'])
 
@@ -60,6 +60,7 @@ def connect_to_kafka(spark_conn):
             .option('subscribe', 'users_created') \
             .option('startingOffsets', 'earliest') \
             .load()
+        
         logging.info("kafka dataframe created successfully")
     except Exception as e:
         logging.warning(f"kafka dataframe could not be created because: {e}")
@@ -141,14 +142,21 @@ if __name__ == "__main__":
     if spark_conn is not None:
         # connect to kafka with spark connection
         spark_df = connect_to_kafka(spark_conn)
+
+        # convert kafka stream to df
         selection_df = create_selection_df_from_kafka(spark_df)
+
+        # cassandra connection
         session = create_cassandra_connection()
 
         if session is not None:
+
+            # create corresponding keyspace/tables if they don't exists
             create_keyspace(session)
             create_table(session)
 
             logging.info("Streaming is being started...")
+
 
             streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")
                                .option('checkpointLocation', '/tmp/checkpoint')

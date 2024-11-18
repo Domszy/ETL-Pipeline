@@ -1,6 +1,7 @@
 version: '3'
 
 services: 
+  # kafka zookeeper
   zookeeper:
       image: confluentinc/cp-zookeeper:7.4.0
       hostname: zookeeper
@@ -18,6 +19,7 @@ services:
       networks:
         - confluent
 
+  # kafka broker 
   broker:
     image: confluentinc/cp-server:7.4.0
     hostname: broker
@@ -55,7 +57,7 @@ services:
       timeout: 5s
       retries: 5
 
-
+  # kafka schema-registry
   schema-registry:
     image: confluentinc/cp-schema-registry:7.4.0
     hostname: schema-registry
@@ -76,8 +78,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-
+  
+  # kafka's control center 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.4.0
     hostname: control-center
@@ -136,6 +138,7 @@ services:
     networks:
       - confluent
 
+  # Airflow scheduler 
   scheduler:
     image: apache/airflow:2.6.0-python3.9
     depends_on:
@@ -148,12 +151,13 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow # 5432 is the default port for pgsql 
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
     command: bash -c "pip install -r ./requirements.txt && airflow db upgrade && airflow scheduler" # run script to install dependencies, upgrade database, start scheduler
     networks:
       - confluent
 
+  # postgres (database connected to airflow to store its metadata)
   postgres:
     image: postgres:14.0
     environment:
@@ -167,15 +171,17 @@ services:
     networks:
       - confluent
 
+  # spark master 
   spark-master:
     image: bitnami/spark:latest
     command: bin/spark-class org.apache.spark.deploy.master.Master
     ports:
-      - "9090:8080"
-      - "7077:7077"
+      - "9090:8080" # Host port (9090) → Maps to Container port (8080), used for UI 
+      - "7077:7077" # connect to workers
     networks:
       - confluent
 
+  # spark worker node
   spark-worker:
     image: bitnami/spark:latest
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
@@ -189,6 +195,7 @@ services:
     networks:
       - confluent
 
+  # cassandra db
   cassandra_db:
     image: cassandra:latest
     container_name: cassandra

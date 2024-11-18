@@ -47,6 +47,7 @@ def stream_data():
     producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=5000)
     current_time = time.time()
 
+    # stimulate the streaming of data
     while True: 
         if time.time() > current_time + 60: 
             break
@@ -60,9 +61,9 @@ def stream_data():
             logging.error(f'An error Occured: {e}')
             continue
 
-
-    producer.send('user_created', json.dumps(formatted_info).encode('utf-8'))
-
+def send_alert():
+    # Placeholder for sending an alert after streaming is done
+    logging.info("Sending alert...")
 
 with DAG('user_automation',
          default_args=default_args,
@@ -73,3 +74,10 @@ with DAG('user_automation',
         task_id='stream_data_from_api',
         python_callable=stream_data
     )
+
+    send_alert_task = PythonOperator(
+        task_id='send_alert',
+        python_callable=send_alert
+    )
+
+    streaming_task >> send_alert_task
