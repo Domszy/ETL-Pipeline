@@ -62,20 +62,32 @@ You can interact with Kafka through its command-line interface (CLI) or through 
 **why do we use Kafka**: Kafka is designed for high-throughput, fault-tolerant, and low-latency data streaming. It is ideal for handling large volumes of real-time data, making it a great choice for applications that require fast processing and real-time analytics.
 
 **Components in Kafka**: 
-* Topic: A stream of messages that are a part of a specific category or feed name is referred to as a Kafka topic. In Kafka, data is stored in the form of topics. Producers write their data to topics, and consumers read the data from these topics.
-* Broker: A Kafka cluster comprises one or more servers that are known as brokers. In Kafka, a broker works as a container that can hold multiple topics with different partitions. A unique integer ID is used to identify brokers in the Kafka cluster. Connection with any one of the kafka brokers in the cluster implies a connection with the whole cluster. If there is more than one broker in a cluster, the brokers need not contain the complete data associated with a particular topic.
-* Consumers and Consumer Groups: Consumers read data from the Kafka cluster. The data to be read by the consumers has to be pulled from the broker when the consumer is ready to receive the message. A consumer group in Kafka refers to a number of consumers that pull data from the same topic or same set of topics.
-* Producers: Producers in Kafka publish messages to one or more topics. They send data to the Kafka cluster. Whenever a Kafka producer publishes a message to Kafka, the broker receives the message and appends it to a particular partition. Producers are given a choice to publish messages to a partition of their choice.
-* Partitions: Topics in Kafka are divided into a configurable number of parts, which are known as partitions. Partitions allow several consumers to read data from a particular topic in parallel. Partitions are separated in order. The number of partitions is specified when configuring a topic, but this number can be changed later on. The partitions comprising a topic are distributed across servers in the Kafka cluster. Each server in the cluster handles the data and requests for its share of partitions. Messages are sent to the broker along with a key. The key can be used to determine which partition that particular message will go to. All messages which have the same key go to the same partition. If the key is not specified, then the partition will be decided in a round-robin fashion.
-* Partition Offset: Messages or records in Kafka are assigned to a partition. To specify the position of the records within the partition, each record is provided with an offset. A record can be uniquely identified within its partition using the offset value associated with it. A partition offset carries meaning only within that particular partition. Older records will have lower offset values since records are added to the ends of partitions.
-* Replicas: Replicas are like backups for partitions in Kafka. They are used to ensure that there is no data loss in the event of a failure or a planned shutdown. Partitions of a topic are published across multiple servers in a Kafka cluster. Copies of the partition are known as Replicas.
-* Leader and Follower: Every partition in Kafka will have one server that plays the role of a leader for that particular partition. The leader is responsible for performing all the read and write tasks for the partition. Each partition can have zero or more followers. The duty of the follower is to replicate the data of the leader. In the event of a failure in the leader for a particular partition, one of the follower nodes can take on the role of the leader.
-* Zookeeper (older versions of kafka only): detects broker failures and coordinates leader elections in that instance. In more recent releases, Kafka has been transitioning to a KRaft mode (Kafka Raft), removing the need for Zookeeper for cluster metadata management and leader election.
+* Topic: A categorized stream of messages where producers write data, and consumers read it.
+* Clusters and Brokers:  A Kafka cluster consists of brokers (servers) storing topics. Connecting to one broker links to the entire cluster. Brokers may not store all data for a topic.
+* Consumers and Consumer Groups: Consumers pull data from brokers. Consumer groups allow multiple consumers to share topic data processing.
+* Producers: Publish messages to topics and partitions. Messages can be routed to specific partitions using keys or via round-robin.
+* Partitions: Topics are split into partitions for parallel processing. Each partition is ordered and distributed across brokers.
+* Partition Offset: A unique identifier for a message's position within a partition, used for tracking and retrieval.
+* Replicas and replication factor: Backup copies of partitions to ensure data availability during failures (specified with replication factor)
+* Leader and Follower: Each partition has a leader (handles reads/writes) and followers (replicate data and take over if the leader fails).
+* Zookeeper: Older versions used Zookeeper for broker failure detection and leader election. Newer versions use KRaft for these tasks.
 
 ![kafka architectural diagram](./images/architecture_diagram_kafka.png)
 
 #### Spark 
+The information below is summarised from [Spark Architecture: A Deep Dive](https://medium.com/@amitjoshi7/spark-architecture-a-deep-dive-2480ef45f0be). Since I am very new to `Spark` as compared to `Kafka` and `Airflow`, I will be going in depth into its architecture here. 
+
 **What is Spark**: Apache Spark is an open-source, distributed computing system designed for fast, large-scale data processing. It provides a unified platform for batch and stream processing, offering high performance for both big data analytics and machine learning workloads.
+
+Spark uses modules such as `Spark SQL`, `MLlib`, `Spark Streaming` and `GraphX` that run on top of the core platform, that aids data processing. 
+
+![spark libraries](./images/spark_modular_architecture.png)
+
+**Difference between Hadoop and Spark**: 
+They have different use cases due to the nature of both big data frameworks: 
+
+* Hadoop: better for cost-effective batch processing and long-term storage in distributed systems.
+* Spark: best for applications requiring speed, iterative processing, or real-time data handling.
 
 **What does Spark do**: Spark is used for processing and analyzing large datasets quickly across multiple machines in a distributed system. It supports both batch processing (processing large volumes of data in chunks) and stream processing (handling real-time data streams). Spark can be used for tasks such as ETL (Extract, Transform, Load), data analysis, machine learning, graph processing, and real-time stream processing.
 
@@ -84,12 +96,36 @@ Spark provides APIs in multiple programming languages, including Scala, Java, Py
 **Why do we use Spark**: Spark is designed for high-speed, fault-tolerant, and scalable data processing. It can handle massive amounts of data and provides in-memory processing, which speeds up analytics and machine learning tasks significantly. It’s a popular choice in big data ecosystems because it offers versatility (supporting both batch and stream processing) and a rich ecosystem for machine learning (MLlib), graph processing (GraphX), and SQL-based querying (Spark SQL).
 
 **Components of Spark**: 
-* Driver and Worker Nodes: The driver node coordinates job execution, while worker nodes execute tasks in parallel.
-* Executors: Executors are responsible for executing tasks and storing the results in memory or disk.
-* RDD, DataFrames, and Datasets: RDDs are the core data structure for distributed processing, while DataFrames and Datasets provide higher-level abstractions and optimizations.
-* Partitioning: Data is split into partitions, allowing parallel processing across workers.
-* Cluster Manager: Manages resources and allocates them across the driver and worker nodes.
-* Stages and Jobs: Jobs are divided into stages and tasks for efficient distributed processing.
+* Drive node: program or process responsible for coordinating the execution of the Spark application. It runs the main function and creates the SparkContext, which connects to the cluster manager. The Spark Driver includes several other components, including a DAG Scheduler, Task Scheduler, Backend Scheduler, and Block Manager, all of which are responsible for translating user-written code into jobs that are actually executed on the cluster. 
+* sparkContext: SparkContext is the entry point for any Spark functionality. It represents the connection to a Spark cluster and can be used to create RDDs (Resilient Distributed Datasets), accumulators, and broadcast variables. SparkContext also coordinates the execution of tasks.
+* Worker node and Executor: Executors are worker processes responsible for executing tasks in Spark applications. They are launched on worker nodes and communicate with the driver program and cluster manager. Executors run tasks concurrently and store data in memory or disk for caching and intermediate storage.
+* Cluster Manager: responsible for allocating resources and managing the cluster on which the Spark application runs. Spark supports various cluster managers like Apache Mesos, Hadoop YARN, and standalone cluster manager.
+
+![spark core architecture](./images/spark_architecture_diagram.png)
+
+**2 Main Abstractions**:
+Apache Spark has a well-defined layer architecture that is designed on two main abstractions:
+
+1. Resilient Distributed Dataset (RDD): RDD is an immutable (read-only), fundamental collection of elements or items that can be operated on many devices at the same time (spark parallel processing). Each dataset in an RDD can be divided into logical portions, which are then executed on different nodes of a cluster.
+2. Directed Acyclic Graph (DAG): DAG is the scheduling layer of the Apache Spark architecture that implements stage-oriented scheduling. Compared to MapReduce which creates a graph in two stages, Map and Reduce, Apache Spark can create DAGs that contain many stages.
+
+**Cluster Manager Types** 
+The system currently supports several cluster managers:
+
+* Standalone — a simple cluster manager included with Spark that makes it easy to set up a cluster.
+* Apache Mesos — a general cluster manager that can also run Hadoop MapReduce and service applications.
+* Hadoop YARN — the resource manager in Hadoop 2.
+* Kubernetes — an open-source system for automating deployment, scaling, and management of containerized applications.
+
+**Execution Modes**
+1. Cluster mode (used in this project)
+In cluster mode, a user submits a pre-compiled JAR, Python script, or R script to a cluster manager. The cluster manager then launches the driver process on a worker node inside the cluster, in addition to the executor processes. This means that the cluster manager is responsible for maintaining all Spark Application–related processes.
+
+2. Client mode
+Client mode is nearly the same as cluster mode except that the Spark driver remains on the client machine that submitted the application. This means that the client machine is responsible for maintaining the Spark driver process, and the cluster manager maintains the executor processes.
+
+3. Local mode
+Local mode is a significant departure from the previous two modes: it runs the entire Spark Application on a single machine. It achieves parallelism through threads on that single machine. This is a common way to learn Spark, test your applications, or experiment iteratively with local development.
 
 #### Set-up and Installation
 
@@ -104,8 +140,8 @@ git clone https://github.com/airscholar/e2e-data-engineering.git
 ```
 cd e2e-data-engineering
 ```
+
 3. Run Docker Compose to spin up the services:
 ```
 docker-compose up
 ```
-
