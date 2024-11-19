@@ -9,7 +9,7 @@ As we systematically review the key concepts from this project, we will walk thr
 
 ### Confluence
 
-While not a part of this diagram, Confluence is important in keeping the Apache services together. 
+Confluence acts as a network for the various Apache services to communicate with each other.
 
 **what is it**: It is a management and monitoring tool for Apache Kafka and related services in the Confluent ecosystem, provides a web based interface to observing and controlling kafka clusters, topics, streams, and connections. 
 
@@ -90,3 +90,22 @@ Spark provides APIs in multiple programming languages, including Scala, Java, Py
 * Partitioning: Data is split into partitions, allowing parallel processing across workers.
 * Cluster Manager: Manages resources and allocates them across the driver and worker nodes.
 * Stages and Jobs: Jobs are divided into stages and tasks for efficient distributed processing.
+
+#### Set-up and Installation
+
+1. Clone the repository:
+
+```
+git clone https://github.com/airscholar/e2e-data-engineering.git
+```
+
+2. Navigate to the project directory and open up the 
+
+```
+cd e2e-data-engineering
+```
+3. Run Docker Compose to spin up the services:
+```
+docker-compose up
+```
+

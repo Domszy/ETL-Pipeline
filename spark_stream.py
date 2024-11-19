@@ -157,7 +157,6 @@ if __name__ == "__main__":
 
             logging.info("Streaming is being started...")
 
-
             streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")
                                .option('checkpointLocation', '/tmp/checkpoint')
                                .option('keyspace', 'spark_streams')
