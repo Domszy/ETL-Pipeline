@@ -39,7 +39,7 @@ we can also access its own web-based UI via `localhost:8080` which allows users 
 
 Below is an outline of the architecture used in this project. More about Airflow's architecture can be found [here](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html). 
 
-![airflow architectural diagram](./images/architecture_diagram_airflow.png)
+![airflow architectural diagram](./images/airflow_architecture_diagram.png)
 
 In a large distributed system, there can be other roles that can be played, such as `Deployment Manager`, `DAG Author`, and `Operations User`, which plays a part in managing a larger system of machines. 
 
@@ -49,7 +49,7 @@ In the case of a distributed deployment, it is important to consider the securit
 * DAG Author: Develops and writes DAGs to define workflows, ensuring they are correctly structured and meet the requirements for execution within the Airflow system.
 * Operations User: Manages the execution of DAGs, monitors task status, triggers runs, and resolves issues, but does not have permissions to modify or create DAGs.
 
-![advanced airflow architectural diagram](./images/advanced_architecture_diagram_airflow.png)
+![advanced airflow architectural diagram](./images/airflow_advanced_architecture_diagram.png)
 
 ### Kafka
 
@@ -72,7 +72,7 @@ You can interact with Kafka through its command-line interface (CLI) or through 
 * Leader and Follower: Each partition has a leader (handles reads/writes) and followers (replicate data and take over if the leader fails).
 * Zookeeper: Older versions used Zookeeper for broker failure detection and leader election. Newer versions use KRaft for these tasks.
 
-![kafka architectural diagram](./images/architecture_diagram_kafka.png)
+![kafka architectural diagram](./images/kafka_architecture_diagram.png)
 
 #### Spark 
 The information below is summarised from [Spark Architecture: A Deep Dive](https://medium.com/@amitjoshi7/spark-architecture-a-deep-dive-2480ef45f0be). Since I am very new to `Spark` as compared to `Kafka` and `Airflow`, I will be going in depth into its architecture here. 
